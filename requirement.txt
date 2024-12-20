@@ -1,0 +1,6 @@
+pathlib
+pip install google-generativeai
+python-dotenv
+pip install youtube-transcript-api
+
+streamlit

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Video Summarizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>YouTube Video Summarizer</h1>
+      <p>Enter a YouTube video URL to extract its transcript and generate a summary.</p>
+    </header>
+    <main>
+      <!-- Form Section -->
+      <form id="summarizer-form" action="process_video.php" method="POST">
+        <label for="youtube-url">YouTube Video URL:</label>
+        <input type="text" id="youtube-url" name="youtube_url" placeholder="Enter YouTube Video URL" required>
+        <button type="submit">Extract Transcript</button>
+      </form>
+
+      <!-- Transcript Section -->
+      <section id="transcript-section" style="display: none;">
+        <h2>Video Transcript:</h2>
+        <div class="content-box" id="transcript-content">
+          <p>Loading transcript...</p>
+        </div>
+        <button type="button" id="summarize-btn">Summarize Video</button>
+      </section>
+
+      <!-- Summary Section -->
+      <section id="summary-section" style="display: none;">
+        <h2>Summary:</h2>
+        <div class="content-box" id="summary-content">
+          <p>Loading summary...</p>
+        </div>
+        <h3>Main Points:</h3>
+        <div class="content-box" id="main-points-content">
+          <ul id="main-points-list">
+            <li>Loading main points...</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>Powered by AI & YouTube Transcript API</p>
+    </footer>
+  </div>
+
+  <!-- JavaScript Section -->
+  <script>
+    // Handle form submission dynamically
+    document.getElementById('summarizer-form').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const youtubeUrl = document.getElementById('youtube-url').value;
+      const transcriptSection = document.getElementById('transcript-section');
+      const transcriptContent = document.getElementById('transcript-content');
+      const summarySection = document.getElementById('summary-section');
+      const summaryContent = document.getElementById('summary-content');
+      const mainPointsList = document.getElementById('main-points-list');
+
+      // Display loading message
+      transcriptSection.style.display = 'block';
+      transcriptContent.innerHTML = '<p>Loading transcript...</p>';
+      
+      // Fetch transcript and summary from the backend
+      try {
+        const response = await fetch('process_video.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ youtube_url: youtubeUrl })
+        });
+
+        const result = await response.json();
+
+        if (result.transcript) {
+          transcriptContent.innerHTML = `<p>${result.transcript}</p>`;
+          summarySection.style.display = 'block';
+          summaryContent.innerHTML = `<p>${result.summary}</p>`;
+          mainPointsList.innerHTML = result.main_points.map(point => `<li>${point}</li>`).join('');
+        } else {
+          transcriptContent.innerHTML = '<p>Failed to fetch transcript. Please try again.</p>';
+        }
+      } catch (error) {
+        transcriptContent.innerHTML = '<p>Error occurred while fetching transcript.</p>';
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
